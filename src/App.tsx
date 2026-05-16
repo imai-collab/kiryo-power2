@@ -943,10 +943,10 @@ export default function App() {
               <div className="text-3xl absolute -bottom-2 -right-2 text-[#634C32] font-bold bg-[#FFFFFF] border-[3px] border-[#634C32] shadow-[0_3px_0_#D0B99B] rounded-lg w-14 h-14 flex items-center justify-center translate-x-3 translate-y-1 z-10">歩</div>
             </div>
             <h1 className="text-3xl font-black text-[#634C32] tracking-tight">
-              １手詰にゃう
+              初心者１手詰
             </h1>
             <p className="text-[#634C32] font-medium leading-relaxed">
-              漢字の駒で
+              動き方のついた駒で
               <br />
               １手詰に挑戦しよう！
               <br />
@@ -969,7 +969,7 @@ export default function App() {
             <div className="text-6xl mb-2 animate-bounce">🎌</div>
             <h1 className="text-3xl font-black text-[#634C32]">全問クリア！</h1>
             <p className="text-[#634C32] font-medium">
-              おめでとうにゃ！すごい！
+              おめでとう！すごい！
             </p>
             <button
               onClick={() => setPuzzleIdx(0)}
@@ -1111,13 +1111,13 @@ export default function App() {
                 <div className="absolute -top-[14px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[12px] border-l-transparent border-r-transparent border-b-[#634C32]"></div>
                 <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-[#FFFFFF] z-10"></div>
                 {solved
-                  ? "やったにゃ！大正解！"
-                  : "あと１手でつみだよ！\nどこに置けばいいかにゃ？"}
+                  ? "やった！大正解！"
+                  : "あと１手で詰みだよ！\nどの手かな？"}
               </div>
 
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-[#634C32]">もんだい いちらん</h3>
+                  <h3 className="font-bold text-[#634C32]"></h3>
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     <button
                       onClick={() => {
@@ -1174,7 +1174,7 @@ export default function App() {
                       className="text-xs px-3 py-1 font-bold flex items-center gap-1 rounded-lg bg-[#EAE8E3] border-2 border-[#DEDCD7] hover:bg-[#DEDCD7] text-[#634C32] transition-colors"
                     >
                       <RefreshCcw size={14} />
-                      JSONをコピーして保存（GitHub同期用）
+                      データをコピー
                     </button>
                   </div>
                 </div>
