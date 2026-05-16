@@ -384,12 +384,11 @@ export default function App() {
   useEffect(() => {
     if (puzzles.length > 0) {
       localStorage.setItem("shogi_puzzles", JSON.stringify(puzzles));
+      // Save directly to the server so it syncs to GitHub
       fetch("/api/save-puzzles", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ puzzles }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ puzzles })
       }).catch(err => console.error("Failed to sync puzzles to server:", err));
     }
   }, [puzzles]);
@@ -446,11 +445,11 @@ export default function App() {
             contents: [
               {
                 inlineData: {
-                  mimeType: "application/pdf",
+                  mimeType: file.type,
                   data: base64
                 }
               },
-              "このPDFデータは詰め将棋（1手詰）の問題集です。\n" +
+              "この画像またはPDFデータは詰め将棋（1手詰）の問題です。\n" +
               "すべての問題を抽出し、JSONで出力してください。\n" +
               "問題の作成ルール：\n" +
               "6x6マスの盤面として出力してください。" +
@@ -910,11 +909,11 @@ export default function App() {
             exit={{ scale: 0.5, opacity: 0, y: -50 }}
             className="fixed top-1/4 left-1/2 -translate-x-1/2 z-[100] pointer-events-none"
           >
-            <div className="relative">
+            <div className="relative flex items-baseline whitespace-nowrap justify-center">
               <span className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-[#FF5A5A] to-[#D04040] drop-shadow-[0_8px_0_#634C32] italic">
                 {combo}
               </span>
-              <span className="text-3xl md:text-5xl font-black text-[#634C32] ml-2 drop-shadow-[0_4px_0_#FFFFFF]">
+              <span className="text-3xl md:text-5xl font-black text-[#634C32] ml-2 drop-shadow-[0_4px_0_#FFFFFF] whitespace-nowrap">
                 連続正解！！
               </span>
               <motion.div 
@@ -969,7 +968,7 @@ export default function App() {
             <div className="text-6xl mb-2 animate-bounce">🎌</div>
             <h1 className="text-3xl font-black text-[#634C32]">全問クリア！</h1>
             <p className="text-[#634C32] font-medium">
-              おめでとう！すごい！
+              １手詰を全制覇！すごい！
             </p>
             <button
               onClick={() => setPuzzleIdx(0)}
@@ -1111,72 +1110,13 @@ export default function App() {
                 <div className="absolute -top-[14px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-r-[10px] border-b-[12px] border-l-transparent border-r-transparent border-b-[#634C32]"></div>
                 <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-[#FFFFFF] z-10"></div>
                 {solved
-                  ? "やった！大正解！"
+                  ? "やったにゃ！大正解！"
                   : "あと１手で詰みだよ！\nどの手かな？"}
               </div>
 
               <div className="mt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-[#634C32]"></h3>
-                  <div className="flex flex-wrap items-center justify-end gap-2">
-                    <button
-                      onClick={() => {
-                        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(puzzles, null, 2));
-                        const downloadAnchorNode = document.createElement('a');
-                        downloadAnchorNode.setAttribute("href",     dataStr);
-                        downloadAnchorNode.setAttribute("download", "doubutsu-shogi-puzzles.json");
-                        document.body.appendChild(downloadAnchorNode); // required for firefox
-                        downloadAnchorNode.click();
-                        downloadAnchorNode.remove();
-                        alert("問題データをJSONファイルとしてダウンロードしました！\nこのファイルを使用して、別の環境で「ファイル読み込み」から復元できます。");
-                      }}
-                      className="text-xs px-3 py-1 font-bold rounded-lg border-2 bg-[#EAE8E3] border-[#CCCCCC] text-[#634C32] hover:bg-[#D9D9D9] transition-all"
-                    >
-                      データ出力
-                    </button>
-                    <input
-                      type="file"
-                      accept=".json"
-                      ref={jsonFileInputRef}
-                      className="hidden"
-                      onChange={handleJsonUpload}
-                    />
-                    <button
-                      onClick={() => jsonFileInputRef.current?.click()}
-                      className="text-xs px-3 py-1 font-bold rounded-lg border-2 bg-[#E1F5FE] border-[#0288D1] text-[#01579B] hover:bg-[#B3E5FC] transition-all"
-                    >
-                      ファイル読込
-                    </button>
-                    <input
-                      type="file"
-                      accept="application/pdf"
-                      ref={fileInputRef}
-                      className="hidden"
-                      onChange={handleFileUpload}
-                     />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isImporting}
-                      className={`text-xs px-3 py-1 font-bold rounded-lg border-2 transition-all ${isImporting ? "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed" : "bg-[#FFF4D2] border-[#D9A300] text-[#806000] hover:bg-[#ffeaaa]"}`}
-                    >
-                      {isImporting ? "読込中..." : "PDFから追加"}
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const jsonStr = JSON.stringify(puzzles, null, 2);
-                        try {
-                          await navigator.clipboard.writeText(jsonStr);
-                          alert("クリップボードに問題データをコピーしました！\n\n【GitHubへ同期する手順】\n1. 左側のファイルツリーから「src/puzzles.json」を開く\n2. 中身をすべて選択して、今コピーしたデータを貼り付ける（上書き）\n3. メニューから「Sync to GitHub」を実行する\n\n※コンテナ内で保存したファイルはGitHub同期の対象にならないため、この手動手順が必要です。");
-                        } catch(e) {
-                          alert("コピーに失敗しました。データ出力ボタンからダウンロードしてください。");
-                        }
-                      }}
-                      className="text-xs px-3 py-1 font-bold flex items-center gap-1 rounded-lg bg-[#EAE8E3] border-2 border-[#DEDCD7] hover:bg-[#DEDCD7] text-[#634C32] transition-colors"
-                    >
-                      <RefreshCcw size={14} />
-                      データをコピー
-                    </button>
-                  </div>
+                <div className="mb-2">
+                  <h3 className="font-bold text-[#634C32]">もんだい いちらん</h3>
                 </div>
                 <div className="grid grid-cols-5 gap-2">
                   {puzzles.slice(puzzlePage * PAGE_SIZE, (puzzlePage + 1) * PAGE_SIZE).map((_, i) => {
@@ -1382,6 +1322,78 @@ export default function App() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Data Import/Export Section */}
+              <div className="mt-4 flex flex-col gap-2 border-t-2 border-[#FFADAD] pt-4">
+                <h3 className="font-bold text-[#634C32] mb-1">
+                  データ管理
+                </h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(puzzles, null, 2));
+                      const downloadAnchorNode = document.createElement('a');
+                      downloadAnchorNode.setAttribute("href",     dataStr);
+                      downloadAnchorNode.setAttribute("download", "doubutsu-shogi-puzzles.json");
+                      document.body.appendChild(downloadAnchorNode); // required for firefox
+                      downloadAnchorNode.click();
+                      downloadAnchorNode.remove();
+                      alert("問題データをJSONファイルとしてダウンロードしました！\nこのファイルを使用して、別の環境で「ファイル読み込み」から復元できます。");
+                    }}
+                    className="flex-1 text-xs px-2 py-2 font-bold rounded-lg border-2 bg-[#EAE8E3] border-[#CCCCCC] text-[#634C32] hover:bg-[#D9D9D9] transition-all"
+                  >
+                    データ出力
+                  </button>
+                  <input
+                    type="file"
+                    accept=".json"
+                    ref={jsonFileInputRef}
+                    className="hidden"
+                    onChange={handleJsonUpload}
+                  />
+                  <button
+                    onClick={() => jsonFileInputRef.current?.click()}
+                    className="flex-1 text-xs px-2 py-2 font-bold rounded-lg border-2 bg-[#E1F5FE] border-[#0288D1] text-[#01579B] hover:bg-[#B3E5FC] transition-all"
+                  >
+                    ファイル読込
+                  </button>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch("/api/save-puzzles", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ puzzles })
+                      });
+                      alert("最新のデータをアプリ本体に保存しました！\nAI Studioの「Sync to GitHub」からGitHubへ反映してください。");
+                    } catch (err) {
+                      alert("保存に失敗しました。");
+                      console.error(err);
+                    }
+                  }}
+                  className="w-full text-sm px-3 py-2 font-bold rounded-lg border-2 bg-[#E8F5E9] border-[#4CAF50] text-[#2E7D32] hover:bg-[#C8E6C9] transition-all mt-1"
+                >
+                  データをコピー
+                </button>
+
+                <div className="mt-2 border-t-2 border-dashed border-[#FFADAD] pt-3">
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isImporting}
+                    className={`w-full py-2 text-sm font-bold rounded-lg border-2 shadow-sm transition-all flex items-center justify-center gap-2 ${isImporting ? "bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed" : "bg-[#FFF4D2] border-[#D9A300] text-[#806000] hover:bg-[#ffeaaa]"}`}
+                  >
+                    {isImporting ? "読み込み中..." : "画像/PDFから問題を自動生成"}
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
